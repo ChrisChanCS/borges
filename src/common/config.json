@@ -1,0 +1,18 @@
+{
+  "description": "0: append only, 1: ycsb, 2: lock, 3: counter, 4: eos/retwis",
+  "workload": 0,
+  "client_num": 1,
+  "io_worker_num": 5,
+  "request_worker_num": 1,
+  "use_rdma": false,
+  "description_of_ycsb": "0~3: A, B, C, D",
+  "ycsb_option": 0,
+  "log_enable": false,
+  "scale_out_stream": false,
+  "scale_out_rate": 0.5,
+  "zipf_theta": 0.99,
+  "backoff_base": 300,
+  "segment_size": 2112,
+  "segment_test": false,
+  "small_segment_size": 2112
+}

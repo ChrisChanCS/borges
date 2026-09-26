@@ -1,0 +1,75 @@
+./emulation/image/docker_images/zookeeper_3.8.3.tar
+./emulation/image/docker_images/mongodb-7.0.tar
+./emulation/image/docker_images/bitnami_kafka_3.6.1.tar
+emulation/image/docker_images/*.tar
+# Docker images
+*.csv
+root.img
+
+.claude/
+
+# Emulation runtime artifacts
+emulation/image/mkosi.cache/
+emulation/image/mkosi.extra/
+emulation/image/mkosi.builddir/
+emulation/qemu_log*.txt
+emulation/vms/[0-9]*/
+emulation/vms/ivshmem_sock.*
+emulation/**/__pycache__/
+emulation/**/*.py[cod]
+
+# Local builds and Python bytecode
+build/
+build-*/
+build_*/
+/validation/
+__pycache__/
+*.py[cod]
+
+# Local experiment state and retired dependency binaries
+/borges_logs/
+/borges_rdma_logs/
+/logs/
+/old_dependencies/
+/emulation/vms_stale_prev_run/
+
+# Local profiling, editor settings, and retired prototypes
+/.vscode/
+/perf.data
+/out.perf
+/output.log
+/test_http_client.cpp
+/sync_bin.sh
+/scripts/run_pasha.sh
+/emulation/KAFKA_SETUP_COMPLETE.md
+
+# Local design notes, validation sources, and retired allocator probes
+/docs/
+/tests/
+/*.md
+!/README.md
+/src/workload/TestMemcpy.cpp
+/src/workload/reader.cpp
+/src/workload/writer.cpp
+/src/workload/shared_defs.h
+
+# Retired dependency copies; the active runtime bundle remains tracked
+/dependencies/cxlalloc/cxlalloc_old.h
+/dependencies/cxlalloc/libcxlalloc_static_old.a
+/dependencies/kernel_module/cxl_ivpci.ko-backup
+/dependencies/kernel_module/cxl_recover_meta-backup
+
+# Local experiment results and helper tools
+/result/
+/client/
+/tools/
+
+# Local MongoDB deployment helpers
+/copy_mongodb_libs.sh
+/scripts/config_mongo_replicaset.sh
+/scripts/upload_mongo_img.sh
+/scripts/upload_mongo_lib.sh
+
+# Local dependency setup helpers
+/build_deps.sh
+/build_rdma_deps.sh

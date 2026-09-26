@@ -7,3 +7,7 @@
 [submodule "dependencies/abseil"]
 	path = dependencies/abseil
 	url = https://github.com/abseil/abseil-cpp.git
+[submodule "third_party/tigon"]
+	path = third_party/tigon
+	url = https://github.com/ut-datasys/tigon.git
+	shallow = true

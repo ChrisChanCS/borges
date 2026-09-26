@@ -1,6 +1,3 @@
-# External CXL emulation tools (see Tigon link in README)
-/emulation/
-
 # Local experiment outputs and VM images
 *.csv
 root.img

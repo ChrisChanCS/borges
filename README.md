@@ -12,7 +12,8 @@ Borges is a research distributed shared log over a shared CXL memory/SSD hybrid.
 | `src/benchmark`, `src/workload` | Workload definitions and executable entry points |
 | `src/rdma` | Optional RDMA backend and diagnostic tools |
 | `dependencies` | Cxlalloc dependencies and runtime libraries |
-| [emulation/](https://github.com/ut-datasys/tigon/tree/master/emulation) | External CXL pod emulation tools from Tigon |
+| [emulation/](https://github.com/ut-datasys/tigon/tree/master/emulation) | Symlink to Tigon's CXL pod emulation tools |
+| `third_party/tigon` | Tigon submodule |
 | `scripts` | Build, deployment, and experiment helpers |
 
 Before each experiment, update `src/common/config.json` and upload it with
@@ -28,10 +29,16 @@ rebuild when changing it.
 ## Build environment for Borges
 
 Borges uses [Tigon's emulation tools](https://github.com/ut-datasys/tigon/tree/master/emulation)
-to emulate a CXL pod with eight VMs. Follow
+to emulate a CXL pod with eight VMs. The `emulation/` symlink points to
+`third_party/tigon/emulation`. Initialize the pinned Tigon submodule after cloning:
+
+```bash
+git submodule update --init --depth 1 third_party/tigon
+```
+
+Follow
 [Tigon's VM setup guide](https://github.com/ut-datasys/tigon#setup-vm-based-cxl-pod-emulation-from-scratch)
-from a separate Tigon checkout to prepare the host, build the VM image, and
-launch the VMs.
+from `third_party/tigon/` to prepare the host, build the VM image, and launch the VMs.
 
 The Borges experiment scripts expect a shared 64 GiB CXL region and root SSH
 access through `127.0.0.1` ports `10022` through `10029`. Once the VMs are running,

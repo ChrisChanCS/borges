@@ -184,6 +184,11 @@ Experiment scripts write output to `result/`, which is kept locally and ignored 
 
 Each workload has an individual script for evaluation. The name is `test-xxx.sh` where `xxx` is the workload name. Before running a different workload, please update `src/common/config.json` according to the setup to test.
 
+The appropriate `request_worker_num` depends on the workload. As a starting
+point, we recommend `1` for low-load experiments and `2` for high-load
+experiments. This setting controls the number of request workers per shard
+server.
+
 After every change to `src/common/config.json`, run the following command from
 the Borges repository root to synchronize the updated configuration to all
 eight VMs before starting the workload:

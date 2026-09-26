@@ -1,22 +1,11 @@
-./emulation/image/docker_images/zookeeper_3.8.3.tar
-./emulation/image/docker_images/mongodb-7.0.tar
-./emulation/image/docker_images/bitnami_kafka_3.6.1.tar
-emulation/image/docker_images/*.tar
-# Docker images
+# External CXL emulation tools (see Tigon link in README)
+/emulation/
+
+# Local experiment outputs and VM images
 *.csv
 root.img
 
 .claude/
-
-# Emulation runtime artifacts
-emulation/image/mkosi.cache/
-emulation/image/mkosi.extra/
-emulation/image/mkosi.builddir/
-emulation/qemu_log*.txt
-emulation/vms/[0-9]*/
-emulation/vms/ivshmem_sock.*
-emulation/**/__pycache__/
-emulation/**/*.py[cod]
 
 # Local builds and Python bytecode
 build/
@@ -31,7 +20,6 @@ __pycache__/
 /borges_rdma_logs/
 /logs/
 /old_dependencies/
-/emulation/vms_stale_prev_run/
 
 # Local profiling, editor settings, and retired prototypes
 /.vscode/
@@ -41,7 +29,6 @@ __pycache__/
 /test_http_client.cpp
 /sync_bin.sh
 /scripts/run_pasha.sh
-/emulation/KAFKA_SETUP_COMPLETE.md
 
 # Local design notes, validation sources, and retired allocator probes
 /docs/

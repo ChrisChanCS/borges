@@ -11,15 +11,13 @@ Borges is a research distributed shared log over a shared CXL memory/SSD hybrid.
 | `src/shard_server` | Request handling, batching, replication, and reads |
 | `src/benchmark`, `src/workload` | Workload definitions and executable entry points |
 | `src/rdma` | Optional RDMA backend and diagnostic tools |
-| `dependencies`, `emulation` | Cxlalloc dependencies and CXL pod emulation |
+| `dependencies` | Cxlalloc dependencies and runtime libraries |
+| [emulation/](https://github.com/ut-datasys/tigon/tree/master/emulation) | External CXL pod emulation tools from Tigon |
 | `scripts` | Build, deployment, and experiment helpers |
 
 Before each experiment, update `src/common/config.json` and upload it with
 `./scripts/run.sh sync 8`. The backend is selected at build time by `use_rdma`;
 rebuild when changing it.
-
-The `emulation/` directory is from [Tigon](https://github.com/ut-datasys/tigon), which is used for emulating CXL memory with a NUMA node. Please refer to Tigon's repo to learn how to use it.
-
 
 ## Hardware requirement
 
@@ -29,20 +27,19 @@ The `emulation/` directory is from [Tigon](https://github.com/ut-datasys/tigon),
 
 ## Build environment for Borges
 
-Borges follows Tigon's exact method to build the environment, where 8 VMs are emulated as a CXL pod.
+Borges uses [Tigon's emulation tools](https://github.com/ut-datasys/tigon/tree/master/emulation)
+to emulate a CXL pod with eight VMs. Follow
+[Tigon's VM setup guide](https://github.com/ut-datasys/tigon#setup-vm-based-cxl-pod-emulation-from-scratch)
+from a separate Tigon checkout to prepare the host, build the VM image, and
+launch the VMs.
 
-1. Host setup
+The Borges experiment scripts expect a shared 64 GiB CXL region and root SSH
+access through `127.0.0.1` ports `10022` through `10029`. Once the VMs are running,
+run the following from the Borges repository to install its CXL driver and
+runtime dependencies:
+
 ```bash
-./scripts/setup.sh HOST
-```
-2. Build VM image
-```bash
-./emulation/image/make_vm_img.sh
-```
-3. Launch VMs
-```bash
-sudo daxctl reconfigure-device --mode=system-ram dax0.0 --force # manage CXL memory as a CPU-less NUMA node
-sudo ./emulation/start_vms.sh --using-old-img --cxl 0 5 8 0 2 # replace the last argument with the NUMA node number of CXL memory (e.g., 2)
+./scripts/setup.sh VMS 8
 ```
 
 ## Compile Borges

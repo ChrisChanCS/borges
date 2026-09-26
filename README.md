@@ -184,6 +184,14 @@ Experiment scripts write output to `result/`, which is kept locally and ignored 
 
 Each workload has an individual script for evaluation. The name is `test-xxx.sh` where `xxx` is the workload name. Before running a different workload, please update `src/common/config.json` according to the setup to test.
 
+After every change to `src/common/config.json`, run the following command from
+the Borges repository root to synchronize the updated configuration to all
+eight VMs before starting the workload:
+
+```bash
+./scripts/run.sh sync 8
+```
+
 ## Baselines
 
 Borges compares with two advanced shared-log systems, [Scalog](https://github.com/scalog/scalog) and [Boki](https://github.com/ut-osa/boki) , both of which are replication-first. 

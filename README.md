@@ -20,32 +20,95 @@ Before each experiment, update `src/common/config.json` and upload it with
 `./scripts/run.sh sync 8`. The backend is selected at build time by `use_rdma`;
 rebuild when changing it.
 
-## Hardware requirement
+## Hardware requirements
 
-1. A CXL device, CXL memory and CMM-H are both OK
-2. A machine with at least 40 cores in one socket
-3. Ubuntu 22.04
+Both configurations below use Ubuntu 22.04. Tigon documents two ways to provide
+the shared memory used by the CXL pod:
+
+| Configuration | Host requirements | Shared-memory backing |
+| --- | --- | --- |
+| Real CXL memory | At least 40 cores in one socket, with CXL memory connected to that socket | A CXL memory device exposed as a NUMA node |
+| CXL emulation with NUMA memory | A two-socket machine with at least 40 cores per socket | DRAM on the remote NUMA node; a CXL device is optional |
+
+The default setup launches eight VMs with five vCPUs each and a shared 64 GiB
+memory region. Provision enough memory for that region and the VMs themselves.
 
 ## Build environment for Borges
 
 Borges uses [Tigon's emulation tools](https://github.com/ut-datasys/tigon/tree/master/emulation)
-to emulate a CXL pod with eight VMs. The `emulation/` symlink points to
-`third_party/tigon/emulation`. Initialize the pinned Tigon submodule after cloning:
+to represent the hosts of a CXL pod as eight VMs on one physical machine. All
+VMs access the same shared-memory region. That region can be backed by either
+real CXL memory or remote NUMA DRAM. With a CXL device, the memory accesses use
+physical CXL memory while the VMs provide the pod's host environment. With NUMA
+DRAM, the setup emulates shared CXL memory; latency and bandwidth depend on the
+machine's NUMA topology.
+
+The `emulation/` symlink points to `third_party/tigon/emulation`. The commands
+below follow the pinned version of
+[Tigon's setup guide](https://github.com/ut-datasys/tigon/blob/ccd567a50116b7bada06df71a3bf0a07c424572e/README.md#setup-vm-based-cxl-pod-emulation-from-scratch).
+
+### 1. Prepare the host and VM image
+
+Start in the Borges repository, initialize the Tigon submodule, then run
+Tigon's host setup and image builder from its own repository root:
 
 ```bash
 git submodule update --init --depth 1 third_party/tigon
+cd third_party/tigon
+./scripts/setup.sh HOST
+./emulation/image/make_vm_img.sh
 ```
 
-Follow
-[Tigon's VM setup guide](https://github.com/ut-datasys/tigon#setup-vm-based-cxl-pod-emulation-from-scratch)
-from `third_party/tigon/` to prepare the host, build the VM image, and launch the VMs.
+### 2. Launch VMs with either memory configuration
+
+Run one of the following alternatives from `third_party/tigon/`. Use
+`numactl --hardware` to inspect the host's NUMA nodes.
+
+#### Option A: real CXL memory
+
+Expose the CXL device's memory as system RAM, then allocate the shared region
+on its NUMA node. This is Tigon's example with device `dax0.0` and CXL NUMA
+node `2`; replace both values with those for your host:
+
+```bash
+sudo daxctl reconfigure-device --mode=system-ram dax0.0 --force
+sudo ./emulation/start_vms.sh --using-old-img --cxl 0 5 8 0 2
+```
+
+#### Option B: emulate CXL memory using remote NUMA DRAM
+
+Use the other socket's DRAM to back the shared region. Tigon's example uses
+NUMA node `1` and enables its uncore frequency setup:
+
+```bash
+sudo ./emulation/start_vms.sh --using-old-img --cxl 0 5 8 1 1
+```
+
+The five positional values after `--cxl` are:
+
+| Argument | Meaning in these examples |
+| --- | --- |
+| `host_id` | `0`: identifier of the physical host running the VMs |
+| `num_cpus` | `5`: vCPUs per VM |
+| `num_vms` | `8`: number of VMs |
+| `configure_uncore_freq` | `0`: skip Tigon's uncore frequency setup; `1`: enable it |
+| `shmem_dir_numa` | NUMA node backing the shared region: `2` for the CXL example, `1` for the remote DRAM example |
+
+Both commands use `--cxl` to select Tigon's shared-memory VM configuration.
+The final NUMA-node argument determines where the shared memory is allocated.
+The launch script configures 64 GiB of shared memory and 10 GiB of private
+memory per VM. `--using-old-img` reuses the prepared VM image and existing VM
+directories.
+
+### 3. Install the Borges VM dependencies
 
 The Borges experiment scripts expect a shared 64 GiB CXL region and root SSH
 access through `127.0.0.1` ports `10022` through `10029`. Once the VMs are running,
-run the following from the Borges repository to install its CXL driver and
-runtime dependencies:
+return from `third_party/tigon/` to the Borges repository and install its CXL
+driver and runtime dependencies:
 
 ```bash
+cd ../..
 ./scripts/setup.sh VMS 8
 ```
 

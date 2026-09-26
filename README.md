@@ -11,7 +11,7 @@ Borges is a research distributed shared log over a shared CXL memory/SSD hybrid.
 | `src/shard_server` | Request handling, batching, replication, and reads |
 | `src/benchmark`, `src/workload` | Workload definitions and executable entry points |
 | `src/rdma` | Optional RDMA backend and diagnostic tools |
-| `dependencies` | Cxlalloc dependencies and runtime libraries |
+| `dependencies` | Borges's CXL kernel module, initialization/recovery tools, Cxlalloc, and runtime libraries |
 | [emulation/](https://github.com/ut-datasys/tigon/tree/master/emulation) | Symlink to Tigon's CXL pod emulation tools |
 | `third_party/tigon` | Tigon submodule |
 | `scripts` | Build, deployment, and experiment helpers |
@@ -43,25 +43,29 @@ physical CXL memory while the VMs provide the pod's host environment. With NUMA
 DRAM, the setup emulates shared CXL memory; latency and bandwidth depend on the
 machine's NUMA topology.
 
-The `emulation/` symlink points to `third_party/tigon/emulation`. The commands
-below follow the pinned version of
+The `emulation/` symlink points to `third_party/tigon/emulation`. Tigon provides
+the VM image builder and shared-memory emulation tools. The VM's CXL kernel
+module and initialization/recovery tools come from Borges's own
+`dependencies/kernel_module/` and are installed in step 3.
+
+Run all commands below from the Borges repository root. The VM image and
+launch commands follow the pinned version of
 [Tigon's setup guide](https://github.com/ut-datasys/tigon/blob/ccd567a50116b7bada06df71a3bf0a07c424572e/README.md#setup-vm-based-cxl-pod-emulation-from-scratch).
 
 ### 1. Prepare the host and VM image
 
-Start in the Borges repository, initialize the Tigon submodule, then run
-Tigon's host setup and image builder from its own repository root:
+Initialize the Tigon submodule, run Borges's host setup, then build the VM
+image through the `emulation/` symlink:
 
 ```bash
 git submodule update --init --depth 1 third_party/tigon
-cd third_party/tigon
 ./scripts/setup.sh HOST
 ./emulation/image/make_vm_img.sh
 ```
 
 ### 2. Launch VMs with either memory configuration
 
-Run one of the following alternatives from `third_party/tigon/`. Use
+Run one of the following alternatives from the Borges repository root. Use
 `numactl --hardware` to inspect the host's NUMA nodes.
 
 #### Option A: real CXL memory
@@ -104,13 +108,24 @@ directories.
 
 The Borges experiment scripts expect a shared 64 GiB CXL region and root SSH
 access through `127.0.0.1` ports `10022` through `10029`. Once the VMs are running,
-return from `third_party/tigon/` to the Borges repository and install its CXL
-driver and runtime dependencies:
+use Borges's setup script to install its CXL driver and runtime dependencies
+before running an experiment:
 
 ```bash
-cd ../..
 ./scripts/setup.sh VMS 8
 ```
+
+This command copies the following files from Borges to every VM and loads
+`/root/cxl_ivpci.ko`:
+
+| Borges file | Destination in each VM |
+| --- | --- |
+| `dependencies/kernel_module/cxl_ivpci.ko` | `/root/cxl_ivpci.ko` |
+| `dependencies/kernel_module/cxl_init` | `/root/cxl_init` |
+| `dependencies/kernel_module/cxl_recover_meta` | `/root/cxl_recover_meta` |
+
+The experiment scripts use these deployed tools to initialize the shared
+64 GiB region and recover allocator metadata.
 
 ## Compile Borges
 

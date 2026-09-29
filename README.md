@@ -30,8 +30,8 @@ the shared memory used by the CXL pod:
 | Real CXL memory | At least 40 cores in one socket, with CXL memory connected to that socket | A CXL memory device exposed as a NUMA node |
 | CXL emulation with NUMA memory | A two-socket machine with at least 40 cores per socket | DRAM on the remote NUMA node; a CXL device is optional |
 
-The default setup launches eight VMs with five vCPUs each and a shared 64 GiB
-memory region. Provision enough memory for that region and the VMs themselves.
+The default setup launches eight VMs with five vCPUs each and a shared 64 GiB/16 GiB 
+memory region for emulated/real CXL device. Provision enough memory for that region and the VMs themselves.
 
 ## Build environment for Borges
 
